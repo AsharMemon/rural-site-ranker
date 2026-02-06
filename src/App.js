@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { MapPin, Users, Stethoscope, Baby, Tent, Video, ChevronDown, Search, UserCheck, Sparkles } from 'lucide-react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { MapPin, Users, Stethoscope, Baby, Tent, Video, ChevronDown, Search, UserCheck, Sparkles, GripVertical, BarChart3, SlidersHorizontal } from 'lucide-react';
 
 // --- Data Structure ---
 
@@ -14,14 +15,14 @@ const locations = [
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: false, // Names appear Eastern European/Caucasian
+    hasPOCPreceptor: false,
     notes: "Alpine Medical Clinic & Bear Street. Tourist medicine, MSK injuries, low risk obstetrics. Service Stoney Nakoda reserve."
   },
   {
     id: 'bassano',
     name: "Bassano",
     distance: 141,
-    population: 1200, // Estimated based on small town context
+    population: 1200,
     preceptors: ["Dr. Amechi Okam"],
     hasEM: true,
     hasObs: false,
@@ -40,7 +41,7 @@ const locations = [
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Ali Barras likely diversity
+    hasPOCPreceptor: true,
     notes: "Crowsnest Medical Clinic. 5 mountain communities. Full service hospital, active OR, GI, Gyn. 15-20 deliveries/year."
   },
   {
@@ -53,20 +54,20 @@ const locations = [
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Owolabi
+    hasPOCPreceptor: true,
     notes: "Busy regional center. Large immigrant population (meat packing industry). 4 clinics, active OR, OB, Anesthesia."
   },
   {
     id: 'camrose',
     name: "Camrose",
-    distance: 278, // PDF says 278km
+    distance: 278,
     population: 19847,
     preceptors: ["Dr. Babatunde Awakan"],
     hasEM: true,
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Awakan
+    hasPOCPreceptor: true,
     notes: "Smith Clinic. Major regional referral center. CT, OR, Active ER. Over 400 deliveries/year."
   },
   {
@@ -89,10 +90,10 @@ const locations = [
     population: 3454,
     preceptors: ["Dr. Justin Low"],
     hasEM: true,
-    hasObs: false, // PDF says No for clinic deliveries, but does prenatal
+    hasObs: false,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Low
+    hasPOCPreceptor: true,
     notes: "Bordering Kainai Nation. Residents run 'mini-clinic'. Visits to satellite clinic on reserve. OR/Anesthesia exposure."
   },
   {
@@ -102,7 +103,7 @@ const locations = [
     population: 3823,
     preceptors: ["Dr. Scott Smith"],
     hasEM: true,
-    hasObs: false, // Prenatal to 24wks only
+    hasObs: false,
     hasIndig: false,
     hasVideo: true,
     hasPOCPreceptor: false,
@@ -114,11 +115,11 @@ const locations = [
     distance: 181,
     population: 889,
     preceptors: ["Dr. Muti Kauchali"],
-    hasEM: true, // Via rotation in Red Deer/Blackfalds
+    hasEM: true,
     hasObs: true,
     hasIndig: false,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Kauchali
+    hasPOCPreceptor: true,
     notes: "Village 40min east of Red Deer. New clinic. Includes shifts in Blackfalds and Red Deer Hospitalist."
   },
   {
@@ -131,7 +132,7 @@ const locations = [
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Osakuade
+    hasPOCPreceptor: true,
     notes: "Trinity Rose & Jacaranda Clinics. Hospital/OR work done in Olds. OSS skills available."
   },
   {
@@ -144,7 +145,7 @@ const locations = [
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Maseka, Dr. Ram
+    hasPOCPreceptor: true,
     notes: "Riverside & Associate Clinics. Dinosaur capital. Federal penitentiary (complex patients). Cancer clinic, dialysis, CT."
   },
   {
@@ -170,7 +171,7 @@ const locations = [
     hasObs: true,
     hasIndig: false,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Makhdoom
+    hasPOCPreceptor: true,
     notes: "Charles Clark & Highwood Health. Mini-regional center. Busy ER (20k/yr), active Obs (400/yr), OR."
   },
   {
@@ -183,7 +184,7 @@ const locations = [
     hasObs: true,
     hasIndig: false,
     hasVideo: false,
-    hasPOCPreceptor: true, // Dr. Chauhan, Dr. Wing
+    hasPOCPreceptor: true,
     notes: "Innisfail Medical Clinic. Strong academic center. Hospitalist, ER, LTC, minor surgery."
   },
   {
@@ -215,14 +216,14 @@ const locations = [
   {
     id: 'olds_didsbury',
     name: "Olds/Didsbury (Combined)",
-    distance: 88, // Avg
-    population: 14600, // Combined
+    distance: 88,
+    population: 14600,
     preceptors: ["Dr. Lauren Galbraith (OSS)", "Clinic Team"],
     hasEM: true,
     hasObs: true,
     hasIndig: true,
     hasVideo: false,
-    hasPOCPreceptor: true, // Shared pool
+    hasPOCPreceptor: true,
     notes: "Likely a rotation split between Jacaranda (Didsbury) and hospital work in Olds."
   },
   {
@@ -245,7 +246,7 @@ const locations = [
     population: 4136,
     preceptors: ["Dr. Eric Baker"],
     hasEM: true,
-    hasObs: false, // Prenatal only
+    hasObs: false,
     hasIndig: true,
     hasVideo: false,
     hasPOCPreceptor: false,
@@ -258,8 +259,8 @@ const locations = [
     population: 2544,
     preceptors: ["Dr. Rob Warren", "Dr. Jon Sommerville"],
     hasEM: true,
-    hasObs: false, // No OR/Obs
-    hasIndig: false, // PDF says Unknown/No
+    hasObs: false,
+    hasIndig: false,
     hasVideo: false,
     hasPOCPreceptor: false,
     notes: "Moose & Squirrel / Greenwood Family. Heavy recreational/tourist ER in summer. Simulation lab onsite."
@@ -292,6 +293,53 @@ const locations = [
   }
 ];
 
+// --- Ranking Algorithm ---
+
+const maxDistance = Math.max(...locations.map(l => l.distance));
+const minDistance = Math.min(...locations.map(l => l.distance));
+const maxPopulation = Math.max(...locations.map(l => l.population));
+const minPopulation = Math.min(...locations.map(l => l.population));
+
+function computeScore(location, preferences) {
+  let score = 0;
+  let totalWeight = 0;
+
+  // Distance: lower is better, so we invert the normalized value
+  if (preferences.distance > 0) {
+    const normalized = 1 - (location.distance - minDistance) / (maxDistance - minDistance);
+    score += normalized * preferences.distance;
+    totalWeight += preferences.distance;
+  }
+
+  // Population: smaller is better (more rural experience)
+  if (preferences.population > 0) {
+    const normalized = 1 - (location.population - minPopulation) / (maxPopulation - minPopulation);
+    score += normalized * preferences.population;
+    totalWeight += preferences.population;
+  }
+
+  // BIPOC preceptor: binary feature
+  if (preferences.bipocPreceptor > 0) {
+    score += (location.hasPOCPreceptor ? 1 : 0) * preferences.bipocPreceptor;
+    totalWeight += preferences.bipocPreceptor;
+  }
+
+  // Obstetrics: binary feature
+  if (preferences.obs > 0) {
+    score += (location.hasObs ? 1 : 0) * preferences.obs;
+    totalWeight += preferences.obs;
+  }
+
+  // Video: binary feature
+  if (preferences.video > 0) {
+    score += (location.hasVideo ? 1 : 0) * preferences.video;
+    totalWeight += preferences.video;
+  }
+
+  if (totalWeight === 0) return 0;
+  return score / totalWeight;
+}
+
 // --- Components ---
 
 const Badge = ({ children, colorClass }) => (
@@ -310,8 +358,37 @@ const Toggle = ({ label, active, onClick, icon: Icon, colorClass }) => (
   >
     {Icon && <Icon size={18} className={active ? 'animate-pulse' : ''} />}
     <span className="text-sm font-semibold">{label}</span>
-    {active && <span className="ml-1 text-lg">✓</span>}
+    {active && <span className="ml-1 text-lg">&check;</span>}
   </button>
+);
+
+const likertLabels = ['Not Important', 'Slightly', 'Moderate', 'Very', 'Essential'];
+
+const LikertScale = ({ label, icon: Icon, value, onChange, colorClass }) => (
+  <div className="mb-4 last:mb-0">
+    <div className="flex items-center gap-2 mb-2">
+      {Icon && <Icon size={16} className={colorClass} />}
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
+    </div>
+    <div className="flex gap-1.5">
+      {[0, 1, 2, 3, 4].map((level) => (
+        <button
+          key={level}
+          onClick={() => onChange(level)}
+          className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+            value === level
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md scale-105'
+              : level <= value
+              ? 'bg-purple-100 text-purple-700 border border-purple-200'
+              : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
+          }`}
+          title={likertLabels[level]}
+        >
+          {likertLabels[level]}
+        </button>
+      ))}
+    </div>
+  </div>
 );
 
 const RuralSiteMatch = () => {
@@ -323,54 +400,37 @@ const RuralSiteMatch = () => {
   const [sortBy, setSortBy] = useState('distance-asc');
   const [expandedId, setExpandedId] = useState(null);
 
-  // Filter & Sort Logic
+  // Likert scale preferences (0-4)
+  const [preferences, setPreferences] = useState({
+    distance: 2,
+    population: 1,
+    bipocPreceptor: 0,
+    obs: 0,
+    video: 0,
+  });
+
+  // Custom ranked order (array of location ids after drag reordering)
+  const [customRankedOrder, setCustomRankedOrder] = useState(null);
+
+  const updatePreference = useCallback((key, value) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+    setCustomRankedOrder(null); // Reset custom order when preferences change
+  }, []);
+
+  // Filter & Sort Logic for the main list
   const processedLocations = useMemo(() => {
     let result = locations;
-
-    // Filtering (Exclusion Logic: If toggle is ON, exclude sites WITH that feature)
-    // Note: Mentorship (POC) usually is "Show me sites WITH mentorship", but user asked to be able to "exclude sites with those features"
-    // The user specifically mentioned "emergency med" or "obstetrics".
-    // I will apply exclusion logic to clinical filters.
-    // For "Made Video" and "Mentorship", exclusion might be weird ("Exclude sites with video"?).
-    // But consistent behavior is best. I will treat ALL toggles as "Exclude" if that ensures the user can "exclude sites with those features".
-    // "By clicking 'emergency med' or 'obstetrics' ... you should be able to exclude sites with those features"
-    // This implies creating a "No EM" or "No Obs" filter.
 
     if (filterPOC) result = result.filter(l => !l.hasPOCPreceptor);
     if (filterIndig) result = result.filter(l => !l.hasIndig);
     if (filterObs) result = result.filter(l => !l.hasObs);
-    // For Video, "Made Video" usually implies "Show me only ones with video". 
-    // If I click "Made Video" and it REMOVES sites with video, that's counter-intuitive unless labeled "No Video".
-    // I'll stick to the user's explicit request for EM/Obs and apply it broadly for consistency, but maybe Video is an exception?
-    // "Change name of 'has video info' to 'made video'".
-    // If I rename it to "Made Video" and it excludes, it's confusing.
-    // I will assume the user wants to filter *by* these attributes.
-    // Maybe they want: "Show only sites without EM".
-    // I will implement exclusion for EM, Obs, Indig.
-
-    if (filterVideo) result = result.filter(l => l.hasVideo); // Keep video as "Include" for now unless explicitly asked?
-    // "By clicking 'emergency med' or 'obstetrics' or the other toggles, you should be able to exclude sites with those features"
-    // "the other toggles" implies ALL.
-    // So if I toggle "Made Video", it excludes sites with video? (Show me sites WITHOUT video?)
-    // That seems unlikely to be useful.
-    // But "Exclude sites with Obstetrics" is a valid preference.
-    // I'll implement exclusion for ALL except maybe Video/Mentorship if it breaks UX, but "other toggles" is strong.
-    // I'll filter OUT sites with the feature.
-
     if (filterVideo) result = result.filter(l => !l.hasVideo);
 
-    // Sorting
     result = [...result].sort((a, b) => {
       if (sortBy === 'distance-asc') return a.distance - b.distance;
       if (sortBy === 'distance-desc') return b.distance - a.distance;
       if (sortBy === 'pop-desc') return b.population - a.population;
       if (sortBy === 'pop-asc') return a.population - b.population;
-
-      // Multi-sort: Distance (primary) + Population (secondary)
-      // Since distance is mostly unique, we normalize to create a score?
-      // "Sort by distance and population at the same time"
-      // Let's implement a simple rank sum? (Rank by Dist + Rank by Pop)
-      // For now, I'll do Primary/Secondary standard keys.
       if (sortBy === 'dist-asc-pop-desc') {
         if (a.distance !== b.distance) return a.distance - b.distance;
         return b.population - a.population;
@@ -379,12 +439,39 @@ const RuralSiteMatch = () => {
         if (a.distance !== b.distance) return a.distance - b.distance;
         return a.population - b.population;
       }
-
       return 0;
     });
 
     return result;
   }, [filterPOC, filterIndig, filterObs, filterVideo, sortBy]);
+
+  // Ranked locations (algorithm-sorted, respecting any drag reordering)
+  const rankedLocations = useMemo(() => {
+    const scored = locations.map(loc => ({
+      ...loc,
+      score: computeScore(loc, preferences),
+    }));
+    scored.sort((a, b) => b.score - a.score);
+
+    if (customRankedOrder) {
+      // Re-sort based on custom drag order
+      const orderMap = {};
+      customRankedOrder.forEach((id, idx) => { orderMap[id] = idx; });
+      scored.sort((a, b) => (orderMap[a.id] ?? 999) - (orderMap[b.id] ?? 999));
+    }
+
+    return scored;
+  }, [preferences, customRankedOrder]);
+
+  const hasAnyPreference = Object.values(preferences).some(v => v > 0);
+
+  const onDragEnd = useCallback((result) => {
+    if (!result.destination) return;
+    const items = Array.from(rankedLocations);
+    const [reordered] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reordered);
+    setCustomRankedOrder(items.map(item => item.id));
+  }, [rankedLocations]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -397,7 +484,7 @@ const RuralSiteMatch = () => {
 
       <div className="relative p-4 md:p-8">
         {/* Header */}
-        <div className="max-w-5xl mx-auto mb-8 text-center">
+        <div className="max-w-7xl mx-auto mb-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md rounded-full border border-white/40 shadow-lg mb-4">
             <Sparkles size={18} className="text-purple-600" />
             <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -412,11 +499,57 @@ const RuralSiteMatch = () => {
           </p>
         </div>
 
+        {/* Preference Ranking Panel */}
+        <div className="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 mb-8">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
+              <SlidersHorizontal size={20} className="text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">Set Your Priorities</h2>
+            <span className="text-sm text-slate-500 ml-2">Rate how important each factor is to you</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+            <LikertScale
+              label="Close Distance to Calgary"
+              icon={MapPin}
+              value={preferences.distance}
+              onChange={(v) => updatePreference('distance', v)}
+              colorClass="text-purple-600"
+            />
+            <LikertScale
+              label="Small Population (More Rural)"
+              icon={Users}
+              value={preferences.population}
+              onChange={(v) => updatePreference('population', v)}
+              colorClass="text-blue-600"
+            />
+            <LikertScale
+              label="BIPOC Preceptor Available"
+              icon={UserCheck}
+              value={preferences.bipocPreceptor}
+              onChange={(v) => updatePreference('bipocPreceptor', v)}
+              colorClass="text-purple-600"
+            />
+            <LikertScale
+              label="Obstetrics Available"
+              icon={Baby}
+              value={preferences.obs}
+              onChange={(v) => updatePreference('obs', v)}
+              colorClass="text-pink-600"
+            />
+            <LikertScale
+              label="Video Mentorship Available"
+              icon={Video}
+              value={preferences.video}
+              onChange={(v) => updatePreference('video', v)}
+              colorClass="text-blue-600"
+            />
+          </div>
+        </div>
+
         {/* Controls Container */}
-        <div className="max-w-5xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 mb-8 sticky top-4 z-10">
-          {/* Top Row: Sort & Main Toggles */}
+        <div className="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 mb-8 sticky top-4 z-10">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
-            {/* Sort */}
             <div className="flex items-center gap-3">
               <label className="text-sm font-semibold text-slate-700">Sort by:</label>
               <select
@@ -424,16 +557,14 @@ const RuralSiteMatch = () => {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="distance-asc">📍 Distance (Closest to Calgary)</option>
-                <option value="distance-desc">📍 Distance (Furthest)</option>
-                <option value="pop-desc">👥 Population (Largest)</option>
-                <option value="pop-asc">👥 Population (Smallest)</option>
-                <option value="dist-asc-pop-desc">📍 Closest + 👥 Largest</option>
-                <option value="dist-asc-pop-asc">📍 Closest + 👥 Smallest</option>
+                <option value="distance-asc">Distance (Closest to Calgary)</option>
+                <option value="distance-desc">Distance (Furthest)</option>
+                <option value="pop-desc">Population (Largest)</option>
+                <option value="pop-asc">Population (Smallest)</option>
+                <option value="dist-asc-pop-desc">Closest + Largest</option>
+                <option value="dist-asc-pop-asc">Closest + Smallest</option>
               </select>
             </div>
-
-            {/* Mentorship Toggle (Highlighted) */}
             <Toggle
               label="Exclude BIPOC Preceptor"
               active={filterPOC}
@@ -442,8 +573,6 @@ const RuralSiteMatch = () => {
               colorClass="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
             />
           </div>
-
-          {/* Bottom Row: Clinical Filters */}
           <div className="flex flex-wrap gap-3">
             <Toggle
               label="Exclude Obs"
@@ -469,146 +598,242 @@ const RuralSiteMatch = () => {
           </div>
         </div>
 
-        {/* Results List */}
-        <div className="max-w-5xl mx-auto grid gap-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/40">
-              Showing <span className="text-purple-600 font-bold">{processedLocations.length}</span> locations
-            </p>
-          </div>
-
-          {processedLocations.map((loc, index) => (
-            <div
-              key={loc.id}
-              className={`bg-white/80 backdrop-blur-md rounded-2xl border-2 transition-all duration-300 overflow-hidden transform hover:scale-[1.01] ${expandedId === loc.id
-                ? 'shadow-2xl border-purple-400 ring-4 ring-purple-100'
-                : 'shadow-lg border-white/60 hover:border-purple-300 hover:shadow-xl'
-                }`}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {/* Card Header */}
-              <div
-                className="p-5 cursor-pointer flex items-center justify-between hover:bg-white/40 transition-all duration-200"
-                onClick={() => setExpandedId(expandedId === loc.id ? null : loc.id)}
-              >
-                <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 flex-grow">
-                  {/* Name & Badges */}
-                  <div className="min-w-[220px]">
-                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 mb-1">
-                      {loc.name}
-                      {loc.hasVideo && (
-                        <div className="bg-blue-500 p-1.5 rounded-lg">
-                          <Video size={16} className="text-white" />
-                        </div>
-                      )}
-                    </h3>
-                    <div className="text-sm text-slate-600 flex items-center gap-4 font-medium">
-                      <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
-                        <MapPin size={14} className="text-purple-600" /> {loc.distance} km
-                      </span>
-                      <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
-                        <Users size={14} className="text-blue-600" /> {loc.population.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
-                    {loc.hasPOCPreceptor && (
-                      <Badge colorClass="bg-gradient-to-r from-purple-500 to-purple-600 text-white border border-purple-400">
-                        BIPOC Preceptor
-                      </Badge>
-                    )}
-                    {loc.hasIndig && (
-                      <Badge colorClass="bg-gradient-to-r from-orange-400 to-orange-500 text-white border border-orange-300">
-                        Indigenous Health
-                      </Badge>
-                    )}
-                    {loc.hasObs && (
-                      <Badge colorClass="bg-gradient-to-r from-pink-400 to-pink-500 text-white border border-pink-300">
-                        Obs
-                      </Badge>
-                    )}
-                    {loc.hasEM && (
-                      <Badge colorClass="bg-gradient-to-r from-red-400 to-red-500 text-white border border-red-300">
-                        ER
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Chevron */}
-                <div className={`ml-4 transition-transform duration-300 ${expandedId === loc.id ? 'rotate-180' : ''}`}>
-                  <ChevronDown size={24} className="text-slate-400" />
-                </div>
+        {/* Main Content: Site Cards + Ranked Sidebar */}
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+          {/* Left: Results List */}
+          <div className="flex-1 min-w-0">
+            <div className="grid gap-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/40">
+                  Showing <span className="text-purple-600 font-bold">{processedLocations.length}</span> locations
+                </p>
               </div>
 
-              {/* Expanded Details */}
-              {expandedId === loc.id && (
-                <div className="px-5 pb-5 pt-0 bg-gradient-to-br from-slate-50/80 to-purple-50/50 backdrop-blur-sm border-t-2 border-purple-100">
-                  <div className="mt-5 grid md:grid-cols-2 gap-5">
-                    <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
-                      <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                        <div className="bg-purple-100 p-1.5 rounded-lg">
-                          <Stethoscope size={16} className="text-purple-600" />
+              {processedLocations.map((loc, index) => (
+                <div
+                  key={loc.id}
+                  className={`bg-white/80 backdrop-blur-md rounded-2xl border-2 transition-all duration-300 overflow-hidden transform hover:scale-[1.01] ${expandedId === loc.id
+                    ? 'shadow-2xl border-purple-400 ring-4 ring-purple-100'
+                    : 'shadow-lg border-white/60 hover:border-purple-300 hover:shadow-xl'
+                    }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div
+                    className="p-5 cursor-pointer flex items-center justify-between hover:bg-white/40 transition-all duration-200"
+                    onClick={() => setExpandedId(expandedId === loc.id ? null : loc.id)}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 flex-grow">
+                      <div className="min-w-[220px]">
+                        <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 mb-1">
+                          {loc.name}
+                          {loc.hasVideo && (
+                            <div className="bg-blue-500 p-1.5 rounded-lg">
+                              <Video size={16} className="text-white" />
+                            </div>
+                          )}
+                        </h3>
+                        <div className="text-sm text-slate-600 flex items-center gap-4 font-medium">
+                          <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
+                            <MapPin size={14} className="text-purple-600" /> {loc.distance} km
+                          </span>
+                          <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
+                            <Users size={14} className="text-blue-600" /> {loc.population.toLocaleString()}
+                          </span>
                         </div>
-                        Preceptors
-                      </h4>
-                      <ul className="space-y-2">
-                        {loc.preceptors.map((p, idx) => (
-                          <li
-                            key={idx}
-                            className={`text-sm flex items-start gap-2 ${loc.hasPOCPreceptor && !["Dr. Zuzana Triska", "Dr. Alina Smirnova", "Dr. Scott Smith", "Dr. Wendy Fortna"].some(n => p.includes(n))
-                              ? "font-bold text-purple-700"
-                              : "text-slate-600 font-medium"
-                              }`}
-                          >
-                            <span className="text-purple-400 mt-0.5">•</span>
-                            {p}
-                          </li>
-                        ))}
-                      </ul>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                        {loc.hasPOCPreceptor && (
+                          <Badge colorClass="bg-gradient-to-r from-purple-500 to-purple-600 text-white border border-purple-400">
+                            BIPOC Preceptor
+                          </Badge>
+                        )}
+                        {loc.hasIndig && (
+                          <Badge colorClass="bg-gradient-to-r from-orange-400 to-orange-500 text-white border border-orange-300">
+                            Indigenous Health
+                          </Badge>
+                        )}
+                        {loc.hasObs && (
+                          <Badge colorClass="bg-gradient-to-r from-pink-400 to-pink-500 text-white border border-pink-300">
+                            Obs
+                          </Badge>
+                        )}
+                        {loc.hasEM && (
+                          <Badge colorClass="bg-gradient-to-r from-red-400 to-red-500 text-white border border-red-300">
+                            ER
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
-                      <h4 className="text-sm font-bold text-slate-700 mb-3">Site Notes</h4>
-                      <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                        {loc.notes}
-                      </p>
-                      {!loc.hasObs && (
-                        <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-2.5">
-                          <p className="text-xs text-orange-700 italic font-medium">
-                            ⚠️ This site may offer prenatal care but typically does not support deliveries/full OB scope.
-                          </p>
-                        </div>
-                      )}
+                    <div className={`ml-4 transition-transform duration-300 ${expandedId === loc.id ? 'rotate-180' : ''}`}>
+                      <ChevronDown size={24} className="text-slate-400" />
                     </div>
                   </div>
+
+                  {expandedId === loc.id && (
+                    <div className="px-5 pb-5 pt-0 bg-gradient-to-br from-slate-50/80 to-purple-50/50 backdrop-blur-sm border-t-2 border-purple-100">
+                      <div className="mt-5 grid md:grid-cols-2 gap-5">
+                        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
+                          <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                            <div className="bg-purple-100 p-1.5 rounded-lg">
+                              <Stethoscope size={16} className="text-purple-600" />
+                            </div>
+                            Preceptors
+                          </h4>
+                          <ul className="space-y-2">
+                            {loc.preceptors.map((p, idx) => (
+                              <li
+                                key={idx}
+                                className={`text-sm flex items-start gap-2 ${loc.hasPOCPreceptor && !["Dr. Zuzana Triska", "Dr. Alina Smirnova", "Dr. Scott Smith", "Dr. Wendy Fortna"].some(n => p.includes(n))
+                                  ? "font-bold text-purple-700"
+                                  : "text-slate-600 font-medium"
+                                  }`}
+                              >
+                                <span className="text-purple-400 mt-0.5">&bull;</span>
+                                {p}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
+                          <h4 className="text-sm font-bold text-slate-700 mb-3">Site Notes</h4>
+                          <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                            {loc.notes}
+                          </p>
+                          {!loc.hasObs && (
+                            <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-2.5">
+                              <p className="text-xs text-orange-700 italic font-medium">
+                                This site may offer prenatal care but typically does not support deliveries/full OB scope.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {processedLocations.length === 0 && (
+                <div className="text-center py-16 bg-white/70 backdrop-blur-md rounded-2xl border-2 border-dashed border-slate-300 shadow-lg">
+                  <div className="bg-gradient-to-br from-slate-100 to-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search size={40} className="text-slate-400" />
+                  </div>
+                  <p className="text-lg font-semibold text-slate-600 mb-2">No locations match your filters</p>
+                  <p className="text-sm text-slate-500 mb-4">Try adjusting your criteria to see more results</p>
+                  <button
+                    onClick={() => {
+                      setFilterPOC(false);
+                      setFilterIndig(false);
+                      setFilterObs(false);
+                      setFilterVideo(false);
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    Clear all filters
+                  </button>
                 </div>
               )}
             </div>
-          ))}
+          </div>
 
-          {processedLocations.length === 0 && (
-            <div className="text-center py-16 bg-white/70 backdrop-blur-md rounded-2xl border-2 border-dashed border-slate-300 shadow-lg">
-              <div className="bg-gradient-to-br from-slate-100 to-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search size={40} className="text-slate-400" />
+          {/* Right: Ranked Sidebar */}
+          <div className="lg:w-96 w-full flex-shrink-0">
+            <div className="lg:sticky lg:top-48">
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 overflow-hidden">
+                {/* Sidebar Header */}
+                <div className="p-4 bg-gradient-to-r from-purple-600 to-pink-600">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 size={20} className="text-white" />
+                    <h2 className="text-lg font-bold text-white">Your Ranked Sites</h2>
+                  </div>
+                  <p className="text-purple-100 text-xs mt-1">
+                    {hasAnyPreference
+                      ? 'Based on your priorities. Drag to reorder.'
+                      : 'Set priorities above to see personalized ranking.'}
+                  </p>
+                  {customRankedOrder && (
+                    <button
+                      onClick={() => setCustomRankedOrder(null)}
+                      className="mt-2 text-xs text-purple-200 hover:text-white underline transition-colors"
+                    >
+                      Reset to algorithm order
+                    </button>
+                  )}
+                </div>
+
+                {/* Ranked Items */}
+                <div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="ranked-list">
+                      {(provided) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className="p-2"
+                        >
+                          {rankedLocations.map((loc, index) => (
+                            <Draggable key={loc.id} draggableId={loc.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`flex items-center gap-3 p-3 mb-1.5 rounded-xl border transition-all duration-200 cursor-grab active:cursor-grabbing ${
+                                    snapshot.isDragging
+                                      ? 'bg-purple-50 border-purple-300 shadow-lg scale-[1.02]'
+                                      : 'bg-white/60 border-slate-100 hover:bg-purple-50/50 hover:border-purple-200'
+                                  }`}
+                                >
+                                  <GripVertical size={16} className="text-slate-300 flex-shrink-0" />
+                                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs font-bold flex-shrink-0">
+                                    {index + 1}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <p className="text-sm font-semibold text-slate-800 truncate">{loc.name}</p>
+                                      {loc.hasVideo && <Video size={12} className="text-blue-500 flex-shrink-0" />}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <span className="text-xs text-slate-500">{loc.distance} km</span>
+                                      <span className="text-xs text-slate-300">|</span>
+                                      <span className="text-xs text-slate-500">{loc.population.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {loc.hasPOCPreceptor && (
+                                        <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-[10px] font-semibold">BIPOC</span>
+                                      )}
+                                      {loc.hasObs && (
+                                        <span className="px-1.5 py-0.5 bg-pink-100 text-pink-700 rounded text-[10px] font-semibold">OB</span>
+                                      )}
+                                      {loc.hasVideo && (
+                                        <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-semibold">Video</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {hasAnyPreference && (
+                                    <div className="flex flex-col items-end flex-shrink-0">
+                                      <span className="text-xs font-bold text-purple-600">{Math.round(loc.score * 100)}%</span>
+                                      <div className="w-12 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                                        <div
+                                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                                          style={{ width: `${loc.score * 100}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
               </div>
-              <p className="text-lg font-semibold text-slate-600 mb-2">No locations match your filters</p>
-              <p className="text-sm text-slate-500 mb-4">Try adjusting your criteria to see more results</p>
-              <button
-                onClick={() => {
-                  setFilterPOC(false);
-                  // setFilterEM(false);
-                  setFilterIndig(false);
-                  setFilterObs(false);
-                  setFilterVideo(false);
-                }}
-                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                Clear all filters
-              </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
