@@ -550,61 +550,61 @@ const RuralSiteMatch = () => {
           </p>
         </div>
 
-        {/* Controls Container */}
-        <div className="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 mb-8 sticky top-4 z-10">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-semibold text-slate-700">Sort by:</label>
-              <select
-                className="bg-white/90 backdrop-blur-sm border-2 border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 px-4 py-2.5 font-medium shadow-sm hover:border-slate-300 transition-all cursor-pointer"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="distance-asc">Distance (Closest to Calgary)</option>
-                <option value="distance-desc">Distance (Furthest)</option>
-                <option value="pop-desc">Population (Largest)</option>
-                <option value="pop-asc">Population (Smallest)</option>
-                <option value="dist-asc-pop-desc">Closest + Largest</option>
-                <option value="dist-asc-pop-asc">Closest + Smallest</option>
-              </select>
-            </div>
-            <Toggle
-              label="Exclude BIPOC Preceptor"
-              active={filterPOC}
-              onClick={() => setFilterPOC(!filterPOC)}
-              icon={UserCheck}
-              colorClass="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
-            />
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Toggle
-              label="Exclude Obs"
-              active={filterObs}
-              onClick={() => setFilterObs(!filterObs)}
-              icon={Baby}
-              colorClass="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"
-            />
-            <Toggle
-              label="Exclude Indigenous"
-              active={filterIndig}
-              onClick={() => setFilterIndig(!filterIndig)}
-              icon={Tent}
-              colorClass="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
-            />
-            <Toggle
-              label="Made Video (Exclude)"
-              active={filterVideo}
-              onClick={() => setFilterVideo(!filterVideo)}
-              icon={Video}
-              colorClass="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-            />
-          </div>
-        </div>
-
         {/* Main Content: Site Cards + Ranked Sidebar */}
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Left: Results List (appears second on mobile, first on desktop) */}
+          {/* Left: Controls + Results List (appears second on mobile, first on desktop) */}
           <div className="flex-1 min-w-0 order-2 lg:order-1">
+            {/* Sort & Filter Controls */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 mb-6">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-semibold text-slate-700">Sort by:</label>
+                  <select
+                    className="bg-white/90 backdrop-blur-sm border-2 border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 px-4 py-2.5 font-medium shadow-sm hover:border-slate-300 transition-all cursor-pointer"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="distance-asc">Distance (Closest to Calgary)</option>
+                    <option value="distance-desc">Distance (Furthest)</option>
+                    <option value="pop-desc">Population (Largest)</option>
+                    <option value="pop-asc">Population (Smallest)</option>
+                    <option value="dist-asc-pop-desc">Closest + Largest</option>
+                    <option value="dist-asc-pop-asc">Closest + Smallest</option>
+                  </select>
+                </div>
+                <Toggle
+                  label="Exclude BIPOC Preceptor"
+                  active={filterPOC}
+                  onClick={() => setFilterPOC(!filterPOC)}
+                  icon={UserCheck}
+                  colorClass="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Toggle
+                  label="Exclude Obs"
+                  active={filterObs}
+                  onClick={() => setFilterObs(!filterObs)}
+                  icon={Baby}
+                  colorClass="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"
+                />
+                <Toggle
+                  label="Exclude Indigenous"
+                  active={filterIndig}
+                  onClick={() => setFilterIndig(!filterIndig)}
+                  icon={Tent}
+                  colorClass="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                />
+                <Toggle
+                  label="Made Video (Exclude)"
+                  active={filterVideo}
+                  onClick={() => setFilterVideo(!filterVideo)}
+                  icon={Video}
+                  colorClass="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                />
+              </div>
+            </div>
+
             <div className="grid gap-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/40">
@@ -741,7 +741,7 @@ const RuralSiteMatch = () => {
 
           {/* Right: Ranked Sidebar (appears first on mobile, second on desktop) */}
           <div className="lg:w-96 w-full flex-shrink-0 order-1 lg:order-2">
-            <div className="lg:sticky lg:top-48">
+            <div className="lg:sticky lg:top-6">
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 overflow-hidden">
                 {/* Sidebar Header */}
                 <div className="p-4 bg-gradient-to-r from-purple-600 to-pink-600">
