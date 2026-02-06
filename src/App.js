@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MapPin, Users, Stethoscope, Baby, Tent, Video, AlertCircle, ChevronDown, Search, UserCheck, Sparkles } from 'lucide-react';
+import { MapPin, Users, Stethoscope, Baby, Tent, Video, ChevronDown, Search, UserCheck, Sparkles } from 'lucide-react';
 
 // --- Data Structure ---
 
