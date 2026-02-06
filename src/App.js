@@ -324,15 +324,15 @@ function computeScore(location, preferences) {
     totalWeight += preferences.bipocPreceptor;
   }
 
-  // Obstetrics: binary feature
+  // Obstetrics: binary feature (inverted — prefer sites WITHOUT obstetrics)
   if (preferences.obs > 0) {
-    score += (location.hasObs ? 1 : 0) * preferences.obs;
+    score += (location.hasObs ? 0 : 1) * preferences.obs;
     totalWeight += preferences.obs;
   }
 
-  // Video: binary feature
+  // Video: binary feature (inverted — penalize sites that made a video)
   if (preferences.video > 0) {
-    score += (location.hasVideo ? 1 : 0) * preferences.video;
+    score += (location.hasVideo ? 0 : 1) * preferences.video;
     totalWeight += preferences.video;
   }
 
@@ -531,20 +531,23 @@ const RuralSiteMatch = () => {
               colorClass="text-purple-600"
             />
             <LikertScale
-              label="Obstetrics Available"
+              label="No Obstetrics"
               icon={Baby}
               value={preferences.obs}
               onChange={(v) => updatePreference('obs', v)}
               colorClass="text-pink-600"
             />
             <LikertScale
-              label="Video Mentorship Available"
+              label="Made a Video 🤮"
               icon={Video}
               value={preferences.video}
               onChange={(v) => updatePreference('video', v)}
               colorClass="text-blue-600"
             />
           </div>
+          <p className="text-xs text-slate-500 mt-4 text-center lg:hidden">
+            Scroll down to the bottom for all site descriptions.
+          </p>
         </div>
 
         {/* Controls Container */}
@@ -600,8 +603,8 @@ const RuralSiteMatch = () => {
 
         {/* Main Content: Site Cards + Ranked Sidebar */}
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Left: Results List */}
-          <div className="flex-1 min-w-0">
+          {/* Left: Results List (appears second on mobile, first on desktop) */}
+          <div className="flex-1 min-w-0 order-2 lg:order-1">
             <div className="grid gap-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/40">
@@ -736,8 +739,8 @@ const RuralSiteMatch = () => {
             </div>
           </div>
 
-          {/* Right: Ranked Sidebar */}
-          <div className="lg:w-96 w-full flex-shrink-0">
+          {/* Right: Ranked Sidebar (appears first on mobile, second on desktop) */}
+          <div className="lg:w-96 w-full flex-shrink-0 order-1 lg:order-2">
             <div className="lg:sticky lg:top-48">
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 overflow-hidden">
                 {/* Sidebar Header */}
